@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahej Seth & Services</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF4081;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            height: 200px;
+            width: auto;
+            margin-right: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 2.5rem;
+            flex: 1;
+            text-align: right;
+        }
+
+        #jobForm {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"], input[type="number"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #333;
+            color: var(--text-color);
+            min-width: 150px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .job-container {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .job-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .job-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .job-link {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background-color: var(--accent-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .job-link:hover {
+            background-color: #e91e63;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .logo {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                text-align: center;
+                font-size: 2rem;
+            }
+
+            #jobForm {
+                flex-direction: column;
+            }
+
+            input[type="text"], input[type="number"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://cdn.discordapp.com/attachments/1198262580779700324/1289025311488344065/Picsart_24-09-27_06-15-53-464.png?ex=66f751df&is=66f6005f&hm=76ccc83ce1a96e6ebee103d7b29ea8f99b88608d221fafc4e10016a9b7f92dd6&" class="logo" alt="Company Logo">
+            <h1>Sahej Seth & Services</h1>
+        </header>
+
+        <form id="jobForm">
+            <input type="text" id="title" placeholder="Job Title" required>
+            <input type="text" id="location" placeholder="Location" required>
+            <input type="number" id="numJobs" placeholder="Number of Jobs" value="10" required>
+            <button type="submit">Search Jobs</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('jobForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetchData();
+        });
+
+        function fetchData() {
+            const title = encodeURIComponent(document.getElementById('title').value);
+            const location = encodeURIComponent(document.getElementById('location').value);
+            const numJobs = encodeURIComponent(document.getElementById('numJobs').value);
+
+            fetch(`https://sahejsaith.onrender.com/jobs?title=${title}&location=${location}&num_jobs=${numJobs}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayJobs(data);
+                })
+                .catch(error => {
+                    document.getElementById('results').innerHTML = `<p>Error fetching jobs: ${error.message}</p>`;
+                });
+        }
+
+        function displayJobs(jobs) {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+
+            if (jobs.length === 0) {
+                results.innerHTML = '<p>No jobs found.</p>';
+                return;
+            }
+
+            jobs.forEach(job => {
+                const jobElement = document.createElement('div');
+                jobElement.className = 'job-container';
+                jobElement.innerHTML = `
+                    <p class="job-title">${job.title}</p>
+                    <p>${job.company} - ${job.location}</p>
+                    <p>Salary: ${job.salary}</p>
+                    <a href="${job.link}" class="job-link" target="_blank">View Job</a>
+                `;
+                results.appendChild(jobElement);
+            });
+        }
+    </script>
+</body>
+</html>
